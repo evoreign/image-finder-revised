@@ -1,16 +1,14 @@
 import { CollectionConfig } from "payload/types";
 export const Models: CollectionConfig = {
     slug: "models",
-    auth: true,
+    admin: {
+        useAsTitle: "ModelName",
+        description: "Collection for various vehicle model data.",
+    },
     fields: [
         {
             name: "ModelName",
             type: "text",
-            required: true,
-        },
-        {
-            name: "PsType",
-            type: "number",
             required: true,
         },
         {
@@ -19,9 +17,10 @@ export const Models: CollectionConfig = {
             required: false,
         },
         {
-            name: "Data",
+            name: "PsType",
             type: "json",
             required: true,
         }
     ],
 }
+export default Models

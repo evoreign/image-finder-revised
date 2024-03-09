@@ -7,7 +7,7 @@ import { slateEditor } from '@payloadcms/richtext-slate'
 import { buildConfig } from 'payload/config'
 
 import Users from './collections/Users'
-import { Models } from './collections/Model'
+import Models  from './collections/Model'
 
 export default buildConfig({
   admin: {
@@ -22,7 +22,7 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
-  plugins: [payloadCloud()],
+  plugins: [],
   db: mongooseAdapter({
     url: process.env.DATABASE_URI,
   }),
