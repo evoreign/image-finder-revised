@@ -2,34 +2,20 @@ import { CollectionConfig } from "payload/types";
 export const AttachmentImages: CollectionConfig = {
     slug: "attachment-images",
     admin: {
-        useAsTitle: "ModelName",
-        description: "Collection for various vehicle model data.",
+        useAsTitle: "ImageID",
+        description: "Collection for various attachment images.",
     },
+    upload: true,
     fields: [
         {
             name: "ImageID",
             type: "number",
-            required: true,
+            required: false,
         },
         {
             name:"HashValue",
             type:"text",
             required: false,
-        },
-        {
-            name:"ImageUrl",
-            type:"text",
-            required: false,
-        },
-        {
-            name: "width",
-            type: "number",
-            required: true,
-        },
-        {
-            name: "height",
-            type: "number",
-            required: true,
         }
     ],
 }

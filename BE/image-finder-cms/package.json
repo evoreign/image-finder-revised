@@ -23,7 +23,8 @@
     "cross-env": "^7.0.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^2.0.0"
+    "payload": "^2.0.0",
+    "payload-cloudinary-plugin": "^0.1.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

@@ -1,8 +1,18 @@
+import { config as dotenvConfig } from 'dotenv';
 import express from 'express'
 import payload from 'payload'
+import { mediaManagement } from "payload-cloudinary-plugin";
 
-require('dotenv').config()
+dotenvConfig();
 const app = express()
+
+const cloudinaryConfig = {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+};
+
+app.use(mediaManagement(cloudinaryConfig));
 
 // Redirect root to Admin panel
 app.get('/', (_, res) => {
