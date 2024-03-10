@@ -23,6 +23,7 @@ while True:
             print(f"Model: {model}")
             model_path = os.path.join(root_path, model)
             files = os.listdir(model_path)
+            brand = model.split()[0]  # Extract the brand from the model
             for file in files:
                 print(f"File: {file}")
                 file_path = os.path.join(model_path, file)
@@ -50,6 +51,7 @@ while True:
 
                 # Create document for MongoDB
                 document = {
+                    'Brand': brand,  # Add the brand to the document
                     'ModelName': model,
                     'ImageUrl': 'blank.png',
                     'PsType': ps_type,

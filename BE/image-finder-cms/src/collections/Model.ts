@@ -7,6 +7,11 @@ export const Models: CollectionConfig = {
     },
     fields: [
         {
+            name: "Brand",
+            type: "text",
+            required: true,
+        },
+        {
             name: "ModelName",
             type: "text",
             required: true,
@@ -20,7 +25,7 @@ export const Models: CollectionConfig = {
             name: "PsType",
             type: "json",
             required: true,
-        }
+        },
     ],
 }
 export default Models
