@@ -2,8 +2,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
-
+import { Separator } from './ui/separator';
+import { UserButton } from '@clerk/nextjs';
 import logo from "../public/logo-dark.png";
 
 const Header: React.FC = () => {
@@ -18,9 +18,11 @@ const Header: React.FC = () => {
         <Link href="/" className="text-black hover:text-blue-500">
             Search
         </Link>
+        <Separator orientation='vertical'/>
         <Link href="/models" className="text-black hover:text-blue-500">
             Docs
         </Link>
+        <UserButton/>
       </div>
     </header>
   );
