@@ -2,7 +2,7 @@ import { config as dotenvConfig } from 'dotenv';
 import express from 'express'
 import payload from 'payload'
 import { mediaManagement } from "payload-cloudinary-plugin";
-
+import SearchRouter from './routes/search/search';
 dotenvConfig();
 const app = express()
 
@@ -30,7 +30,10 @@ const start = async () => {
   })
 
   // Add your own express routes here
-
+  app.get('/hello', (_, res) => {
+    res.send('Hello, world');
+  });
+  app.use('/search', SearchRouter);
   app.listen(4000)
 }
 
