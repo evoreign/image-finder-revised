@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'
-
+import { NextUIProvider } from "@nextui-org/react";
 
 import "./globals.css";
 
@@ -19,9 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>{children}</body>
-      </html>
+        <html lang="en">
+          <body className={inter.className}>{children}</body>
+        </html>
     </ClerkProvider>
 
   );
