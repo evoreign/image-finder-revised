@@ -38,6 +38,7 @@ const getModelsFromDb = async (imageId: string) => {
 
 const formatResults = (models: any[], imageId: string) => {
   const results = models.map(model => ({
+    _id: model._id,
     Brand: model.Brand,
     ModelName: model.ModelName,
     ImageUrl: model.ImageUrl,
@@ -82,13 +83,14 @@ router.get('/all', async (req: Request, res: Response) => {
 
     // Map over the documents and only return the model, ImageUrl fields and keys of data
     const results = models
-      .filter(model => !pstype || model.PsType[pstype])
-      .map(model => ({
-        Brand: model.Brand,
-        ModelName: model.ModelName,
-        ImageUrl: model.ImageUrl,
-        PsType: pstype ? model.PsType[pstype] : model.PsType
-      }));
+    .filter(model => !pstype || model.PsType[pstype])
+    .map(model => ({
+      _id: model._id,
+      Brand: model.Brand,
+      ModelName: model.ModelName,
+      ImageUrl: model.ImageUrl,
+      PsType: pstype ? model.PsType[pstype] : model.PsType
+    }));
 
     const response = { results, totalPages };
 

@@ -4,38 +4,28 @@ import { Payment, columns } from "./columns"
 import { DataTable } from "./data-table"
 import Header from "@/components/header";
 
-// async function getData(): Promise<Payment[]> {
-//   const response = await fetch('http://localhost:4000/api/models');
-//   if (!response.ok) {
-//       throw new Error(`HTTP error! status: ${response.status}`);
-//   }
-//   const data = await response.json();
-//   return data;
-// }
-async function getData(): Promise<Payment[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      brand: "KOM",
-      imgUrl: "https://res.cloudinary.com/dxatvm6sr/image/upload/v1710070137/attachment-images/wa04halkakzte6f25x1x.png",
-      name: "m@example.com",
-    },
-    {
-      id: "728ed52f",
-      brand: "LIE",
-      imgUrl: "https://res.cloudinary.com/dxatvm6sr/image/upload/v1710070137/attachment-images/wa04halkakzte6f25x1x.png",
-      name: "test",
-    },
-    {
-      id: "728ed52f",
-      brand: "LIE",
-      imgUrl: "https://res.cloudinary.com/dxatvm6sr/image/upload/v1710070137/attachment-images/wa04halkakzte6f25x1x.png",
-      name: "test1",
-    },
+interface ApiResponse {
+  _id: string;
+  Brand: string;
+  ModelName: string;
+  ImageUrl: string;
+  PsType: Record<string, Record<string, { Tab: string, Section: string }>>;
+}
 
-    // ...
-  ]
+async function getData(): Promise<Payment[]> {
+  const response = await fetch('http://localhost:4000/search/all');
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const { results } = await response.json();
+  return results.map((item: ApiResponse) => ({
+    id: item._id,
+    brand: item.Brand,
+    imgUrl: item.ImageUrl,
+    name: item.ModelName,
+  }));
 }
 
 export default function DemoPage() {
