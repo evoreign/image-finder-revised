@@ -25,6 +25,7 @@ async function getData(): Promise<Payment[]> {
     brand: item.Brand,
     imgUrl: item.ImageUrl,
     name: item.ModelName,
+    psType: item.PsType,
   }));
 }
 

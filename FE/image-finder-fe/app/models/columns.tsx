@@ -19,6 +19,7 @@ export type Payment = {
   brand: string
   name: string
   imgUrl: string // add this if it's not already there
+  psType: Record<string, Record<string, { Tab: string, Section: string }>>; // add this
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -64,7 +65,7 @@ export const columns: ColumnDef<Payment>[] = [
     header: () => <div className="text-right">Action</div>,
     cell: ({ row }) => {
       const payment = row.original
-
+  
       return (
         <div className="text-right">
           <DropdownMenu >
@@ -79,11 +80,12 @@ export const columns: ColumnDef<Payment>[] = [
               <DropdownMenuItem
                 onClick={() => navigator.clipboard.writeText(payment.id)}
               >
-                Copy payment ID
+                Copy model ID
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>View customer</DropdownMenuItem>
-              <DropdownMenuItem>View payment details</DropdownMenuItem>
+              {payment.psType && Object.keys(payment.psType).map(psType => (
+                <DropdownMenuItem key={psType}>{`View PsType ${psType}'s images id`}</DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
