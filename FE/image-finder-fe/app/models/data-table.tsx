@@ -30,6 +30,7 @@ import {
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import * as React from "react"
+import { DialogPsType } from "./ps-type-dialog"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
