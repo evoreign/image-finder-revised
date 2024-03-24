@@ -13,7 +13,7 @@ export const AttachmentImages: CollectionConfig = {
             required: false,
         },
         {
-            name:"HashValue",
+            name:"Embeddings",
             type:"text",
             required: false,
         }
