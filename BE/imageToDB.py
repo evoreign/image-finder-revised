@@ -21,19 +21,31 @@ root_folder = 'C://Users//EdbertKhovey//Documents//Btech image finder revised//B
 os.chdir(root_folder)
 
 # Connect to MongoDB Atlas
-client = MongoClient("mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = MongoClient(
+    "mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client["test"]
 collection = db["attachment-images"]
 
 # Function to extract embeddings from an image
+
+
 def extract_embedding(image_path):
     sift = cv2.SIFT_create()
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     keypoints, descriptors = sift.detectAndCompute(image, None)
-    descriptors = descriptors.astype(np.float32)  # Ensure that the descriptors are of type float32
-    return bson.binary.Binary(descriptors.flatten().tobytes())  # Serialize descriptors to bytes
+    if descriptors is not None:  # Check if descriptors are not None
+        # Ensure that the descriptors are of type float32
+        descriptors = descriptors.astype(np.float32)
+        # Serialize descriptors to bytes
+        return bson.binary.Binary(descriptors.flatten().tobytes())
+    else:
+        # If no descriptors are found, return None
+        return None
+
 
 # Function to check if an embedding already exists in the collection
+
+
 def embedding_exists(embedding):
     existing_embeddings = collection.find({}, {"_id": 0, "Embeddings": 1})
     for existing_embedding in existing_embeddings:
@@ -42,6 +54,8 @@ def embedding_exists(embedding):
     return False
 
 # Function to upload image to Cloudinary and measure time taken
+
+
 def upload_to_cloudinary(image_path):
     start_time = time.time()  # Start timing
     cloudinary_response = uploader.upload(image_path)
@@ -49,20 +63,22 @@ def upload_to_cloudinary(image_path):
     upload_time = end_time - start_time  # Calculate upload time
     return cloudinary_response, upload_time
 
+
 # Folder containing reference images
-reference_images_folder = './SampleImage/ref'
+reference_images_folder = './all image'
 reference_image_filenames = os.listdir(reference_images_folder)
 
 # Iterate through each reference image
 for filename in reference_image_filenames:
     reference_image_path = os.path.join(reference_images_folder, filename)
     embedding = extract_embedding(reference_image_path)
-    
+
     # Check if embedding already exists in MongoDB Atlas
     if not embedding_exists(embedding):
         # Upload image to Cloudinary and measure time
-        cloudinary_response, upload_time = upload_to_cloudinary(reference_image_path)
-        
+        cloudinary_response, upload_time = upload_to_cloudinary(
+            reference_image_path)
+
         # Extract relevant Cloudinary data
         cloudinary_data = {
             "public_id": cloudinary_response.get("public_id", ""),
@@ -71,14 +87,15 @@ for filename in reference_image_filenames:
             "secure_url": cloudinary_response.get("secure_url", ""),
             "resource_type": cloudinary_response.get("resource_type", ""),
         }
-        
+
         # Get file information
         file_info = os.stat(reference_image_path)
         file_size = file_info.st_size
-        
+
         # Create MongoDB document
         document = {
-            "ImageID": str(cloudinary_response["version"]),  # Example version as ImageID
+            # Example version as ImageID
+            "ImageID": str(cloudinary_response["version"]),
             "Embeddings": embedding,
             "cloudinary": cloudinary_data,
             "filename": filename,
@@ -90,10 +107,11 @@ for filename in reference_image_filenames:
             "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()),
             "__v": 0
         }
-        
+
         # Upload document to MongoDB Atlas
         collection.insert_one(document)
-        print(f"Uploaded embedding and Cloudinary data for {filename} in {upload_time} seconds")
+        print(f"Uploaded embedding and Cloudinary data for {
+              filename} in {upload_time} seconds")
     else:
         print(f"Embedding for {filename} already exists, skipping.")
 

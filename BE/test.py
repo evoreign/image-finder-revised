@@ -8,7 +8,7 @@ root_folder = 'C://Users//EdbertKhovey//Documents//Btech image finder revised//B
 os.chdir(root_folder)
 
 # Load the image to search
-image_to_search = cv2.imread('./SampleImage/Ref3-test-crop.png', cv2.IMREAD_GRAYSCALE)
+image_to_search = cv2.imread('./SampleImage/656.png', cv2.IMREAD_GRAYSCALE)
 
 # Initialize SIFT detector
 sift = cv2.SIFT_create()
@@ -32,21 +32,26 @@ start_time = time.time()
 
 # Iterate through each MongoDB document
 for doc in mongodb_documents:
-    # Load the reference descriptors
-    descriptors_reference = np.frombuffer(doc["Embeddings"], dtype=np.float32).reshape(-1, 128)
-    
-    # Match the descriptors between the image to search and the reference image
-    matcher = cv2.DescriptorMatcher_create(cv2.DescriptorMatcher_FLANNBASED)
-    matches = matcher.knnMatch(descriptors_to_search, descriptors_reference, k=2)
-    
-    # Apply ratio test to find good matches
-    good_matches = []
-    for m, n in matches:
-        if m.distance < 0.75 * n.distance:
-            good_matches.append(m)
-    
-    # Store the similarity score for this reference image
-    similarity_scores[doc["filename"]] = len(good_matches)
+    # Check if "Embeddings" key exists and is not None
+    if "Embeddings" in doc and doc["Embeddings"] is not None:
+        # Load the reference descriptors
+        descriptors_reference = np.frombuffer(doc["Embeddings"], dtype=np.float32).reshape(-1, 128)
+        
+        # Match the descriptors between the image to search and the reference image
+        matcher = cv2.DescriptorMatcher_create(cv2.DescriptorMatcher_FLANNBASED)
+        matches = matcher.knnMatch(descriptors_to_search, descriptors_reference, k=2)
+        
+        # Apply ratio test to find good matches
+        good_matches = []
+        for m, n in matches:
+            if m.distance < 0.75 * n.distance:
+                good_matches.append(m)
+        
+        # Store the similarity score for this reference image
+        similarity_scores[doc["filename"]] = len(good_matches)
+    else:
+        # Handle the case where "Embeddings" key is missing or None
+        similarity_scores[doc["filename"]] = 0  # Assigning a similarity score of 0
 
 # Stop timing
 end_time = time.time()

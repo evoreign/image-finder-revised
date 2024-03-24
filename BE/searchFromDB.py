@@ -51,21 +51,23 @@ def compare_embeddings(local_embedding, mongodb_embeddings, k):
 
 
 # Load the local image
-local_image_path = './SampleImage/imageToSearch.png'
+local_image_path = './SampleImage/656.png'
 local_embedding = extract_embedding(local_image_path)
 
 # Query MongoDB to retrieve all documents containing embeddings
 mongodb_embeddings = collection.find({}, {"filename": 1, "Embeddings": 1})
 
 # Compare local embedding with embeddings in MongoDB using KNN
-k = 5  # Adjust the number of nearest neighbors as needed
+k = 1  # Adjust the number of nearest neighbors as needed
 matches = compare_embeddings(local_embedding, mongodb_embeddings, k=k)
 
 # Print the matches
 for filename, match in matches:
     print(f"Matches for {filename}: {len(match)}")
     if len(match) > 0:
-        print(f"Matched descriptors: {match[0]}")
+        # Accessing distances of individual matches
+        for m in match:
+            print(f"Matched descriptors: {m.distance}")
     else:
         print("No matches found.")
 
