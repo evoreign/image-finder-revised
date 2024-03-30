@@ -24,12 +24,11 @@ os.chdir(root_folder)
 client = MongoClient(
     "mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client["test"]
-collection = db["attachment-images"]
+collection = db["attachment-images-sifts"]
 
 # Function to extract embeddings from an image
-
-
 def extract_embedding(image_path):
+    start_time = time.time()  # Start timing
     sift = cv2.SIFT_create()
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     keypoints, descriptors = sift.detectAndCompute(image, None)
@@ -37,15 +36,16 @@ def extract_embedding(image_path):
         # Ensure that the descriptors are of type float32
         descriptors = descriptors.astype(np.float32)
         # Serialize descriptors to bytes
-        return bson.binary.Binary(descriptors.flatten().tobytes())
+        embedding = bson.binary.Binary(descriptors.flatten().tobytes())
     else:
         # If no descriptors are found, return None
-        return None
-
+        embedding = None
+    end_time = time.time()  # End timing
+    embedding_time = end_time - start_time
+    print(f"Extracting embedding for {image_path} took {embedding_time} seconds")
+    return embedding, embedding_time
 
 # Function to check if an embedding already exists in the collection
-
-
 def embedding_exists(embedding):
     existing_embeddings = collection.find({}, {"_id": 0, "Embeddings": 1})
     for existing_embedding in existing_embeddings:
@@ -54,15 +54,13 @@ def embedding_exists(embedding):
     return False
 
 # Function to upload image to Cloudinary and measure time taken
-
-
 def upload_to_cloudinary(image_path):
     start_time = time.time()  # Start timing
     cloudinary_response = uploader.upload(image_path)
     end_time = time.time()  # End timing
     upload_time = end_time - start_time  # Calculate upload time
+    print(f"Uploading {image_path} to Cloudinary took {upload_time} seconds")
     return cloudinary_response, upload_time
-
 
 # Folder containing reference images
 reference_images_folder = './all image'
@@ -71,7 +69,7 @@ reference_image_filenames = os.listdir(reference_images_folder)
 # Iterate through each reference image
 for filename in reference_image_filenames:
     reference_image_path = os.path.join(reference_images_folder, filename)
-    embedding = extract_embedding(reference_image_path)
+    embedding, embedding_time = extract_embedding(reference_image_path)
 
     # Check if embedding already exists in MongoDB Atlas
     if not embedding_exists(embedding):
@@ -108,10 +106,14 @@ for filename in reference_image_filenames:
             "__v": 0
         }
 
+        start_time = time.time()  # Start timing
         # Upload document to MongoDB Atlas
         collection.insert_one(document)
-        print(f"Uploaded embedding and Cloudinary data for {
-              filename} in {upload_time} seconds")
+        end_time = time.time()  # End timing
+        mongodb_time = end_time - start_time
+        print(f"Uploading document to MongoDB took {mongodb_time} seconds")
+        total_time = embedding_time + upload_time + mongodb_time
+        print(f"Total time for {filename}: {total_time} seconds")
     else:
         print(f"Embedding for {filename} already exists, skipping.")
 

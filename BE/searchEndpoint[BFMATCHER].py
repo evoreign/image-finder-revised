@@ -25,7 +25,7 @@ def perform_search(image_to_search):
     # Connect to MongoDB
     client = MongoClient("mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     db = client["test"]  # replace with your database name
-    collection = db["attachment-images"]  # replace with your collection name
+    collection = db["attachment-images-sifts"]  # replace with your collection name
 
     # Get a list of MongoDB documents
     mongodb_documents = collection.find()
@@ -93,7 +93,7 @@ def search():
     image = Image.open(io.BytesIO(file_content)).convert('L')
     image_to_search = np.array(image)
 
-    # Get the cached results if they exist, otherwise perform the search and cache the results
+    # Get the cached results if they exist, otherwise pHWerform the search and cache the results
     cache_key = 'sorted_reference_images_' + str(hash(file_content))
     sorted_reference_images, execution_time = cache.get(cache_key) or perform_search(image_to_search)
     if cache.get(cache_key) is None:
@@ -128,4 +128,4 @@ def search():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=6000)

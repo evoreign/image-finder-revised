@@ -10,6 +10,7 @@ import cloudinaryPlugin from "payload-cloudinary-plugin/dist/plugins";
 import Users from './collections/Users'
 import Models  from './collections/Model'
 import AttachmentImages from './collections/AttachmentImages'
+import AttachmentImagesSift from './collections/AttachmentImagesSift'
 
 export default buildConfig({
   admin: {
@@ -20,7 +21,8 @@ export default buildConfig({
   collections: [
     Users, 
     Models,
-    AttachmentImages
+    AttachmentImages,
+    AttachmentImagesSift,
   ],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
