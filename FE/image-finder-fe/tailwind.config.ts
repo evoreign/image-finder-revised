@@ -1,16 +1,16 @@
-import type { Config } from "tailwindcss"
-import {nextui} from "@nextui-org/react";
+import type { Config } from "tailwindcss";
+import { nextui } from "@nextui-org/react";
+const { default: flattenColorPalette } = require("tailwindcss/lib/util/flattenColorPalette");
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-
-	],
+  ],
   prefix: "",
   theme: {
     container: {
@@ -73,9 +73,15 @@ const config = {
         meteor: {
           "0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
           "70%": { opacity: "1" },
-          "100%": {
-            transform: "rotate(215deg) translateX(-500px)",
-            opacity: "0",
+          "100%": { transform: "rotate(215deg) translateX(-500px)", opacity: "0" },
+        },
+        // Add the aurora keyframes from AceTernity UI demo
+        aurora: {
+          from: {
+            backgroundPosition: "50% 50%, 50% 50%",
+          },
+          to: {
+            backgroundPosition: "350% 50%, 350% 50%",
           },
         },
       },
@@ -83,13 +89,27 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "meteor-effect": "meteor 5s linear infinite",
+        // Add the aurora animation from AceTernity UI demo
+        aurora: "aurora 60s linear infinite",
       },
-      
     },
   },
+  plugins: [
+    require("tailwindcss-animate"),
+    nextui(),
+    addVariablesForColors,
+  ],
+} satisfies Config;
 
+// This plugin adds each Tailwind color as a global CSS variable, e.g. var(--gray-200).
+function addVariablesForColors({ addBase, theme }: any) {
+  let allColors = flattenColorPalette(theme("colors"));
+  let newVars = Object.fromEntries(
+    Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+  addBase({
+    ":root": newVars,
+  });
+}
 
-  plugins: [require("tailwindcss-animate"), nextui()],
-} satisfies Config
-
-export default config
+export default config;
