@@ -1,7 +1,10 @@
+"use client";
 import Header from "@/components/header";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import React from "react";
-export default function Home() {
+
+function Home() {
+  
   return (
     <AuroraBackground>
       <main className="flex flex-col items-center justify-center min-h-screen py-20">
@@ -11,3 +14,4 @@ export default function Home() {
     </AuroraBackground>
   );
 }
+export default Home;
