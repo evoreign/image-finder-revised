@@ -20,7 +20,7 @@ const Header: React.FC = () => {
         </Link>
         <Separator orientation='vertical'/>
         <Link href="/models" className="text-black hover:text-blue-500">
-            Docs
+            Library
         </Link>
         <UserButton/>
       </div>

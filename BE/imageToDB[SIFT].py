@@ -92,7 +92,6 @@ for filename in reference_image_filenames:
 
         # Create MongoDB document
         document = {
-            # Example version as ImageID
             "ImageID": str(cloudinary_response["version"]),
             "Embeddings": embedding,
             "cloudinary": cloudinary_data,
