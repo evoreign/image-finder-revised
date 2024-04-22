@@ -76,7 +76,7 @@ def perform_search(task_uuid, image_to_search, uuid_binary, result_collection):
 
     # Store the search results in the specified result collection
     store_search_results(sorted_reference_images, execution_time, uuid_binary, result_collection)
-    
+
 def store_search_results(search_results, execution_time, uuid_binary, result_collection):
     # Prepare the data to be inserted into MongoDB
     data = {
@@ -97,6 +97,10 @@ def callback(ch, method, properties, body):
     task_uuid = task['uuid']
     uuid_binary = task['uuid_binary']
 
+    # Print the received task UUID
+    print(f"Received task with UUID: {task_uuid}")
+    print("Processing task... Please wait....👍")
+
     # Connect to MongoDB for storing search results
     client = MongoClient("mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     db = client["test"]
@@ -109,6 +113,7 @@ def callback(ch, method, properties, body):
 
     # Acknowledge the task
     ch.basic_ack(delivery_tag=method.delivery_tag)
+    print(f"Task with UUID {task_uuid} completed")
 
 def consume_tasks():
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
