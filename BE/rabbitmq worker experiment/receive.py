@@ -78,6 +78,15 @@ def perform_search(task_uuid, image_to_search, uuid_binary, result_collection):
     store_search_results(sorted_reference_images, execution_time, uuid_binary, result_collection)
 
 def store_search_results(search_results, execution_time, uuid_binary, result_collection):
+    # Connect to MongoDB for storing search results
+    client = MongoClient("mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+    db = client["test"]
+
+    # Check if the UUID already exists in the image-queue collection
+    if result_collection.count_documents({"uuid": uuid_binary}) > 0:
+        print(f"UUID {uuid_binary} already exists in the image-queue collection. Skipping storage.")
+        return
+
     # Prepare the data to be inserted into MongoDB
     data = {
         'uuid': uuid_binary,
@@ -99,12 +108,21 @@ def callback(ch, method, properties, body):
 
     # Print the received task UUID
     print(f"Received task with UUID: {task_uuid}")
-    print("Processing task... Please wait....👍")
 
     # Connect to MongoDB for storing search results
     client = MongoClient("mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     db = client["test"]
     result_collection = db["image-queue"]
+
+    # Check if the UUID already exists in the image-queue collection
+    if result_collection.count_documents({"uuid": uuid_binary}) > 0:
+        print(f"UUID {uuid_binary} already exists in the image-queue collection. Skipping search.")
+        # Acknowledge the task
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+        print(f"Task with UUID {task_uuid} skipped")
+        return
+
+    print("Processing task... Please wait....👍")
 
     # Perform the image similarity search and store results
     image_data = task['image_data']

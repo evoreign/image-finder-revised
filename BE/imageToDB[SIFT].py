@@ -17,7 +17,7 @@ cloudinary.config(
 )
 
 # Change the current working directory to the root folder
-root_folder = 'C://Users//EdbertKhovey//Documents//Btech image finder revised//BE'
+root_folder = '../BE'
 os.chdir(root_folder)
 
 # Connect to MongoDB Atlas
@@ -63,7 +63,7 @@ def upload_to_cloudinary(image_path):
     return cloudinary_response, upload_time
 
 # Folder containing reference images
-reference_images_folder = './all image'
+reference_images_folder = './download751ZE032722'
 reference_image_filenames = os.listdir(reference_images_folder)
 
 # Iterate through each reference image
@@ -113,7 +113,9 @@ for filename in reference_image_filenames:
         print(f"Uploading document to MongoDB took {mongodb_time} seconds")
         total_time = embedding_time + upload_time + mongodb_time
         print(f"Total time for {filename}: {total_time} seconds")
+        time.sleep(2)
     else:
         print(f"Embedding for {filename} already exists, skipping.")
+        time.sleep(2)
 
 print("Upload complete.")
