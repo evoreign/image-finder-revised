@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons'; // Import Radix UI Icons
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Label } from "@/components/ui/label"
-import Link from 'next/link';
+import axios from 'axios'; // Import Axios
+import { useRouter } from 'next/navigation'; // Import useRouter instead of next/navigation
 
 const SearchBar: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<boolean>(false);
+  const router = useRouter(); // Initialize useRouter
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -16,17 +21,29 @@ const SearchBar: React.FC = () => {
 
   const handleUpload = async () => {
     if (image) {
+      setLoading(true);
+      setError(null);
+      setSuccess(false);
       const formData = new FormData();
       formData.append('image', image);
 
       try {
-        const response = await fetch('127.0.0.1:6000/search', {
-          method: 'POST',
-          body: formData,
+        const response = await axios.post('http://127.0.0.1:80/search', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
         });
+        console.log('Response:', response.data);
         // Handle response
+        setLoading(false);
+        setSuccess(true);
+        // Redirect user to the new URL with UUID and filename as query parameters
+        router.push(`/image/${response.data.UUID}?fileName=${encodeURIComponent(image.name)}`);
       } catch (error) {
         // Handle error
+        console.error('Error uploading image:', error);
+        setLoading(false);
+        setError('An error occurred. Please try again.');
       }
     }
   };
@@ -37,9 +54,15 @@ const SearchBar: React.FC = () => {
         <Label htmlFor="picture">Enter picture you want to search</Label>
         <Input id="picture" type="file" accept="image/png, image/jpeg" onChange={handleFileChange} />
       </div>
-      <Button onClick={handleUpload}>
-        <MagnifyingGlassIcon className="text-gray text-4xl" />
+      <Button onClick={handleUpload} disabled={loading}>
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <MagnifyingGlassIcon className="text-gray text-4xl" />
+        )}
       </Button>
+      {error && <div className="text-red-500">{error}</div>}
+      {success && <div className="text-green-500">Upload successful!</div>}
     </div>
   );
 };

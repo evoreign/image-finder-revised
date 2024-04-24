@@ -11,8 +11,10 @@ import uuid
 from pymongo import MongoClient
 import hashlib
 from bson import Binary
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 def generate_uuid(image_data):
     seed = image_data[:20]
     sha1_hash = hashlib.sha1(seed).digest()
@@ -35,7 +37,7 @@ def enqueue_task(task):
     connection.close()
 
     # Return the UUID as a response
-    return jsonify({'url': f'/imagesearch/{task_uuid}'}), 202
+    return jsonify({'UUID': f'{task_uuid}'}), 202
 
 client = MongoClient("mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client["test"]  # Replace with your database name
@@ -69,7 +71,7 @@ def get_search_results(uuid_str):
         return jsonify(search_results_with_uuid)
     else:
         # If the document is not found, return an error response
-        return jsonify({'error': 'Search results not found for the provided UUID.'}), 404
+        return jsonify({'error': 'Please be patient, your image is in the queue. Check this page periodically'}), 404
 
 @app.route('/search', methods=['POST'])
 def search():
@@ -83,9 +85,13 @@ def search():
     # Read the file content into a variable
     image_data = file.read()
 
-    # Serialize the task (e.g., image data)
+    # Get the filename
+    filename = file.filename
+
+    # Serialize the task (e.g., image data and filename)
     task = {
-        'image_data': image_data
+        'image_data': image_data,
+        'filename': filename
     }
 
     # Enqueue the task onto RabbitMQ
@@ -95,4 +101,4 @@ def search():
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True, port=6000)
+    app.run(debug=True, port=80)
