@@ -53,6 +53,9 @@ export default function ImagePage({ params }: { params: ParamsType }) {
                                     alt={image.original_filename}
                                     width={250}
                                     height={250}
+                                    loading='lazy'
+                                    quality={80}
+  
                                 />
                                 <p>{image.original_filename}</p>
                             </div>
