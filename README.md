@@ -1,7 +1,7 @@
 # Image finder
 
 A image finder tool, that use SIFT to generate descriptor and use BFMATCHER or FLANN to match identical picture in the DB. 
-Not merged to DB because....
+Not merged to Main because....i just dont want any unexpected breaking too much hassle and mental burden 🤷
 
 ## Tech Stack
 
