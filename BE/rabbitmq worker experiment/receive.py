@@ -7,6 +7,7 @@ import uuid
 from pymongo import MongoClient
 import hashlib
 from bson import Binary
+import psutil
 
 def generate_uuid(image_data):
     seed = image_data[:20]
@@ -35,35 +36,39 @@ def perform_search(task_uuid, image_to_search, uuid_binary, result_collection):
     # Start timing
     start_time = time.time()
 
-    # Initialize BFMatcher
-    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+    # Initialize FLANN matcher
+    FLANN_INDEX_KDTREE = 0
+    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+    search_params = dict(checks=50)
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
 
     # Iterate through each MongoDB document (reference image)
     for doc in mongodb_documents:
-        # Check if "Embeddings" key exists and is not None
-        if "Embeddings" in doc and doc["Embeddings"] is not None:
+        # Check if "Embeddings" key exists and is not None or 0
+        if "Embeddings" in doc and doc["Embeddings"] not in (None, 0):
             # Load the reference descriptors
             descriptors_reference = np.frombuffer(doc["Embeddings"], dtype=np.float32).reshape(-1, 128)
-            
-            # Match the descriptors between the image to search and the reference image
-            matches = bf.match(descriptors_to_search, descriptors_reference)
-            
-            # Sort matches by distance
-            matches = sorted(matches, key = lambda x:x.distance)
-            
-            # Store the similarity score, original_filename, and secure_url for this reference image
-            similarity_scores[doc["_id"]] = {
-                'similarity_score': len(matches),
-                'original_filename': doc['cloudinary']['original_filename'] if 'cloudinary' in doc and 'original_filename' in doc['cloudinary'] else None,
-                'secure_url': doc['cloudinary']['secure_url'] if 'cloudinary' in doc and 'secure_url' in doc['cloudinary'] else None
-            }
+
+            # Check if reference descriptors are not empty
+            if descriptors_reference.size > 0:
+                # Match the descriptors between the image to search and the reference image
+                matches = flann.knnMatch(descriptors_to_search, descriptors_reference, k=1)
+
+                # Apply ratio test to filter good matches
+                good_matches = []
+                for m in matches:
+                    if len(m) > 0:
+                        good_matches.append(m[0])
+
+                # Store the similarity score, original_filename, and secure_url for this reference image
+                similarity_scores[doc["_id"]] = {
+                    'similarity_score': len(good_matches),
+                    'original_filename': doc['cloudinary']['original_filename'] if 'cloudinary' in doc and 'original_filename' in doc['cloudinary'] else None,
+                    'secure_url': doc['cloudinary']['secure_url'] if 'cloudinary' in doc and 'secure_url' in doc['cloudinary'] else None
+                }
         else:
-            # Handle the case where "Embeddings" key is missing or None
-            similarity_scores[doc["_id"]] = {
-                'similarity_score': 0,
-                'original_filename': doc['cloudinary']['original_filename'] if 'cloudinary' in doc and 'original_filename' in doc['cloudinary'] else None,
-                'secure_url': doc['cloudinary']['secure_url'] if 'cloudinary' in doc and 'secure_url' in doc['cloudinary'] else None
-            }
+            # Skip the document if "Embeddings" key is missing, None, or 0
+            continue
 
     # Stop timing
     end_time = time.time()
@@ -133,6 +138,30 @@ def callback(ch, method, properties, body):
     ch.basic_ack(delivery_tag=method.delivery_tag)
     print(f"Task with UUID {task_uuid} completed")
 
+def monitor_resources(interval=60):
+    while True:
+        # Get CPU usage
+        cpu_percent = psutil.cpu_percent(interval=None)
+
+        # Get memory usage
+        mem = psutil.virtual_memory()
+        mem_percent = mem.percent
+
+        # Get disk usage
+        disk = psutil.disk_usage('/')
+        disk_percent = disk.percent
+
+        # Log resource usage metrics
+        log_metrics(cpu_percent, mem_percent, disk_percent)
+
+        # Wait for the specified interval
+        time.sleep(interval)
+
+def log_metrics(cpu_percent, mem_percent, disk_percent):
+    # Write resource usage metrics to a log file
+    with open('resource_usage.log', 'a') as f:
+        f.write(f"Time:{time.time()} CPU Usage: {cpu_percent}% | Memory Usage: {mem_percent}% | Disk Usage: {disk_percent}%\n")
+
 def consume_tasks():
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
@@ -148,4 +177,11 @@ def consume_tasks():
     channel.start_consuming()
 
 if __name__ == '__main__':
+    # Start resource monitoring in a separate thread
+    import threading
+    resource_monitor_thread = threading.Thread(target=monitor_resources)
+    resource_monitor_thread.daemon = True
+    resource_monitor_thread.start()
+
+    # Start consuming tasks
     consume_tasks()

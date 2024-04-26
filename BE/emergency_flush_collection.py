@@ -4,7 +4,7 @@ from pymongo import MongoClient
 client = MongoClient(
     "mongodb+srv://kopi:kopi@cluster0.1lc1x8s.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client["test"]
-collection = db["attachment-images-sifts"]
+collection = db["image-queue"]
 
 # Ask for user confirmation
 print("WARNING: You are about to delete all documents in the collection. This action cannot be undone.")
